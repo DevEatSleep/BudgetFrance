@@ -1,5 +1,16 @@
 @inherits LayoutComponentBase
+@using BudgetFrance.Web.Services
 
 <main class="page">
     @Body
 </main>
+
+<footer class="site-footer">
+    <nav aria-label="Liens du site">
+        <a href="">Simulateur</a>
+        <a href="methode">Méthode</a>
+        <a href="mentions-legales">Mentions légales</a>
+        <a href="@SiteLinks.Repository" target="_blank" rel="noopener">Code source</a>
+        <a href="@SiteLinks.NewIssue" target="_blank" rel="noopener">Signaler une erreur</a>
+    </nav>
+</footer>
