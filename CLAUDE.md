@@ -6,9 +6,9 @@ Simulateur citoyen de la dépense publique française : préférences par domain
 
 Solution `BudgetFrance.slnx`, `net10.0`, 4 projets, **sans backend** (site statique) :
 
-- **`BudgetFrance.Domain`** — zéro dépendance. `Baseline` (données de référence), `Scenario` (variations en % par code de poste), `FeasibilityEvaluator` + `FeasibilityResult` (tout le calcul et le verdict), `ProposalGenerator` (pistes de financement, évaluées par `FeasibilityEvaluator`), `Programme` + `ProgrammeEvaluator` (programmes 2027 : mesures en Md€ → `Scenario`).
+- **`BudgetFrance.Domain`** — zéro dépendance. `Baseline` (données de référence), `Scenario` (variations en % par code de poste), `FeasibilityEvaluator` + `FeasibilityResult` (tout le calcul et le verdict), `ProposalGenerator` (pistes de financement, évaluées par `FeasibilityEvaluator`), `Programme` + `ProgrammeEvaluator` (programmes 2027 : mesures en Md€ → `Scenario`), `QuickScenario` (mode rapide : plus / autant / moins par priorité et pour les impôts → `Scenario`).
 - **`BudgetFrance.Importer`** — console : `EurostatClient` (JSON-stat) + `BaselineBuilder` (catalogue des postes, fourchettes UE) → `BudgetFrance.Web/wwwroot/data/baseline.json`, versionné.
-- **`BudgetFrance.Web`** — Blazor WASM autonome : `Pages/Home.razor` (état du scénario, URL), `Components/LineSlider.razor`, `Components/VerdictPanel.razor`, `Components/PriorityPicker.razor`, `Components/ProposalList.razor`, `Components/ProgrammeList.razor`, `Services/ScenarioQuery.cs` (encodage `?s=CODE:pct,…&p=PRIO,…`), `Pages/Methode.razor` (méthode et limites publiques, chiffres lus dans `baseline.json`), `Pages/MentionsLegales.razor`, `Services/SiteLinks.cs` (dépôt, signalement d'erreur).
+- **`BudgetFrance.Web`** — Blazor WASM autonome : `Pages/Home.razor` (état du scénario, URL), `Components/LineSlider.razor`, `Components/VerdictPanel.razor`, `Components/PriorityPicker.razor`, `Components/ProposalList.razor`, `Components/ProgrammeList.razor`, `Components/QuickQuiz.razor`, `Services/ScenarioQuery.cs` (encodage `?s=CODE:pct,…&p=PRIO,…`), `Pages/Methode.razor` (méthode et limites publiques, chiffres lus dans `baseline.json`), `Pages/MentionsLegales.razor`, `Services/SiteLinks.cs` (dépôt, signalement d'erreur).
 - **`BudgetFrance.Tests`** — xUnit, ne référence que le Domain.
 
 ## Conventions

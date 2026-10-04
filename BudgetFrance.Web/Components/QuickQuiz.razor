@@ -1,0 +1,108 @@
+@using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
+
+<section class="quiz" aria-labelledby="quiz-title">
+    <h2 id="quiz-title">Mode rapide</h2>
+    <p class="proposals-intro">
+        Pour chaque priorité choisie, dites si la dépense publique doit augmenter, rester au même niveau ou baisser,
+        puis faites de même pour les impôts. Le simulateur en déduit un budget et vérifie s'il tient.
+    </p>
+
+    @if (SelectedPriorities.Count == 0)
+    {
+        <p class="programme-hint">Choisissez des priorités ci-dessus pour répondre aux questions sur la dépense.</p>
+    }
+    @foreach (var priority in Baseline.Priorities.Where(p => SelectedPriorities.Contains(p.Code)))
+    {
+        <fieldset>
+            <legend><strong>@priority.Label</strong> : dépense publique consacrée à ce domaine</legend>
+            @Options($"quiz-{priority.Code}", answers.TryGetValue(priority.Code, out var answer) ? answer : null,
+                     direction => answers[priority.Code] = direction,
+                     QuickScenario.PriorityChangePct, QuickScenario.PriorityStep(Baseline, priority), "")
+        </fieldset>
+    }
+
+    <fieldset>
+        <legend><strong>Impôts et cotisations sociales</strong> : niveau des prélèvements</legend>
+        @Options("quiz-impots", taxes, direction => taxes = direction,
+                 QuickScenario.TaxChangePct, QuickScenario.TaxStep(Baseline), " sur chacun")
+        <small class="quiz-note">
+            Même variation sur la TVA, les impôts sur le revenu, sur les sociétés, sur la production, sur les successions et les cotisations.
+        </small>
+    </fieldset>
+
+    <button type="button" class="action quiz-submit" disabled="@(!Complete)" @onclick="Apply">Calculer ce budget</button>
+    @if (!Complete)
+    {
+        <p class="quiz-note">Répondez à chaque question pour calculer le budget.</p>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public Baseline Baseline { get; set; } = default!;
+    [Parameter] public IReadOnlySet<string> SelectedPriorities { get; set; } = new HashSet<string>();
+    [Parameter] public EventCallback<Scenario> OnApply { get; set; }
+
+    /// <summary>Scénario affiché, au format de l'URL (<see cref="ScenarioQuery.Format"/>).</summary>
+    [Parameter, EditorRequired] public string Current { get; set; } = "";
+
+    private static readonly Direction[] Directions = [Direction.Less, Direction.Same, Direction.More];
+
+    private readonly Dictionary<string, Direction> answers = new();
+    private Direction? taxes;
+    private string? applied;
+    private string? seen;
+
+    private bool Complete => taxes is not null && SelectedPriorities.All(answers.ContainsKey);
+
+    // Scénario modifié ailleurs (curseur, piste, programme, retour au budget) : les réponses ne le décrivent plus.
+    protected override void OnParametersSet()
+    {
+        if (Current == seen)
+            return;
+        seen = Current;
+        if (Current != applied)
+        {
+            answers.Clear();
+            taxes = null;
+        }
+    }
+
+    // Les réponses d'une priorité désélectionnée sont gardées, mais pas appliquées.
+    private Task Apply()
+    {
+        var scenario = QuickScenario.Build(Baseline,
+            new(answers.Where(a => SelectedPriorities.Contains(a.Key)).ToDictionary(), taxes!.Value));
+        applied = ScenarioQuery.Format(scenario.ChangesPct);
+        return OnApply.InvokeAsync(scenario);
+    }
+
+    // Aucune option cochée par défaut : le citoyen répond à chaque question.
+    private RenderFragment Options(string name, Direction? selected, Action<Direction> select, int pct, decimal step, string scope) =>
+        @<div class="quiz-options">
+            @foreach (var direction in Directions)
+            {
+                <label>
+                    <input type="radio" name="@name" checked="@(selected == direction)" @onchange="() => select(direction)" />
+                    @Label(direction)
+                    @if (direction != Direction.Same)
+                    {
+                        <small>@Detail(direction, pct, step, scope)</small>
+                    }
+                </label>
+            }
+        </div>;
+
+    private static string Detail(Direction direction, int pct, decimal step, string scope)
+    {
+        var sign = direction == Direction.More ? "+" : "−";
+        return $"{sign}{pct} %{scope}, soit {sign}{step:N0} Md€";
+    }
+
+    private static string Label(Direction direction) => direction switch
+    {
+        Direction.Less => "Moins",
+        Direction.More => "Plus",
+        _ => "Autant"
+    };
+}

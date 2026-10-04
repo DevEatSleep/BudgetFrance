@@ -14,6 +14,7 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 - Priorités du citoyen (3 au plus, partagées dans l'URL) : santé, éducation, climat, sécurité, retraites, solidarité, égalité femmes-hommes, culture. Postes concernés mis en avant, bilan par priorité dans le verdict.
 - Pistes de financement selon les priorités : paniers fiscaux, économies hors priorités, mixte ; chaque piste est évaluée et applicable en un clic.
 - Programmes 2027 : programmes des candidats encodés en mesures sourcées (`programmes.json`), évalués avec le même calcul, comparés sens par sens aux priorités du citoyen, applicables en un clic. Catalogue validé par les tests ; livré vide.
+- Mode rapide : plus / autant / moins par priorité et pour les impôts, traduit en scénario (±10 % / ±5 %) ; curseurs repliés en mode expert ; comparaison aux programmes sous le verdict.
 - Nouveaux postes COFOG de niveau 2 : énergie (GF0403), transports (GF0405), famille et enfance (GF1004).
 
 - Licence MIT (code) et CC BY 4.0 (`programmes.json`).

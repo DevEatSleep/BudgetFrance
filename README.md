@@ -10,6 +10,10 @@ Périmètre : toutes les administrations publiques (État, Sécurité sociale, c
 
 Le citoyen choisit jusqu'à 3 thèmes qui comptent pour lui (santé, climat, égalité femmes-hommes…). Les postes concernés passent en tête et le verdict indique si chaque priorité est renforcée, maintenue ou réduite. Ce bilan n'influe pas sur la faisabilité. Chaque thème regroupe des postes COFOG ; le catalogue est défini dans `BaselineBuilder`.
 
+## Mode rapide
+
+Pour chaque priorité choisie, le citoyen répond plus, autant ou moins ; une dernière question porte sur les impôts. `QuickScenario` (Domain) traduit les réponses en `Scenario` (±10 % sur les postes de la priorité, ±5 % sur toutes les recettes réglables), évalué comme les autres. Le scénario obtenu est chargé dans les curseurs, repliés en mode expert, et dans l'URL. Règles détaillées : voir la [méthode](https://budgetfrance.onrender.com/methode).
+
 ## Pistes de financement
 
 Tant que le budget n'est pas soutenable, `ProposalGenerator` (Domain) propose des pistes qui comblent l'effort restant (le plus exigeant entre 3 % de déficit et stabilisation de la dette) :
@@ -47,7 +51,7 @@ Règles d'encodage et charte de neutralité : voir la [méthode](https://budgetf
 
 | Projet | Rôle |
 | --- | --- |
-| `BudgetFrance.Domain` | Modèle (`Baseline`, `Scenario`, `Programme`), règles de faisabilité (`FeasibilityEvaluator`), pistes (`ProposalGenerator`) et programmes (`ProgrammeEvaluator`). Aucune dépendance. |
+| `BudgetFrance.Domain` | Modèle (`Baseline`, `Scenario`, `Programme`), règles de faisabilité (`FeasibilityEvaluator`), pistes (`ProposalGenerator`) et programmes (`ProgrammeEvaluator`), mode rapide (`QuickScenario`). Aucune dépendance. |
 | `BudgetFrance.Importer` | Console qui interroge l'API Eurostat et écrit `BudgetFrance.Web/wwwroot/data/baseline.json`. |
 | `BudgetFrance.Web` | Client Blazor WebAssembly autonome (site statique). |
 | `BudgetFrance.Tests` | Tests xUnit du Domain. |
