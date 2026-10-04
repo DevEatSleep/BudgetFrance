@@ -1,0 +1,30 @@
+# Render n'a pas de SDK .NET pour les sites statiques : on construit ici, et Render publie la branche `deploy`.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet test BudgetFrance.slnx
+      - run: dotnet publish BudgetFrance.Web -c Release -o out
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: deploy
+          publish_dir: out/wwwroot
+          force_orphan: true

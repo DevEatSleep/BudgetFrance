@@ -93,10 +93,14 @@ L'importeur se lance depuis la racine du repo. Le JSON produit est versionné : 
 
 ## Déploiement
 
-Render Static Site (gratuit) :
+Branches : `develop` (intégration), `main` (production). `ci.yml` lance les tests sur chaque PR et sur `develop`.
 
-- Build command : `dotnet publish BudgetFrance.Web -c Release -o out`
-- Publish directory : `out/wwwroot`
+Render n'a pas de SDK .NET pour les sites statiques, la construction se fait donc dans GitHub Actions : à chaque push sur `main`, `deploy.yml` teste, publie en Release et pousse `wwwroot` sur la branche `deploy`. Render Static Site (gratuit) publie cette branche :
+
+- Branche : `deploy`, sans build command, publish directory `.`
 - Rewrite rule : `/*` → `/index.html`
 
-Render n'a pas de SDK .NET dans son environnement de build statique : à valider au premier déploiement (sinon, build via GitHub Actions et publication du dossier `wwwroot`).
+## Licences
+
+- Code : [MIT](LICENSE).
+- Données : `baseline.json` est dérivé d'Eurostat (CC BY 4.0, © Union européenne) ; `programmes.json` est publié sous [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.fr), chaque mesure citant sa source.
