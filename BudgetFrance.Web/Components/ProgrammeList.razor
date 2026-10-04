@@ -59,6 +59,7 @@
                         }
                     </ul>
                     <small>Programme publié le @programme.PublishedOn.ToString("d").</small>
+                    <small><a href="@SiteLinks.EncodingIssue(programme.Candidate)" target="_blank" rel="noopener">Signaler une erreur d'encodage</a></small>
                 </details>
 
                 <button type="button" class="action" @onclick="() => OnApply.InvokeAsync(evaluation.Scenario)">Partir de ce programme</button>

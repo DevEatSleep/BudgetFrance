@@ -1,0 +1,51 @@
+@page "/mentions-legales"
+@using BudgetFrance.Web.Services
+
+<PageTitle>Mentions légales — Budget France</PageTitle>
+
+<article class="prose">
+    <h1>Mentions légales</h1>
+
+    <h2>Éditeur</h2>
+    <p>
+        Thierry Verdier, particulier, directeur de la publication. Budget France est un projet citoyen non commercial.
+        Contact : <a href="@SiteLinks.Contact" target="_blank" rel="noopener">issues GitHub du projet</a>.
+    </p>
+
+    <h2>Hébergement</h2>
+    <p>
+        Site : Render Services, Inc., 525 Brannan Street, Suite 300, San Francisco, CA 94107, États-Unis
+        (+1&nbsp;415&nbsp;319&nbsp;8186, <a href="https://render.com" target="_blank" rel="noopener">render.com</a>).
+    </p>
+    <p>
+        Code source : GitHub, Inc. (<a href="@SiteLinks.Repository" target="_blank" rel="noopener">dépôt du projet</a>).
+    </p>
+
+    <h2>Propriété intellectuelle et licences</h2>
+    <ul>
+        <li>Code : licence <a href="@($"{SiteLinks.Repository}/blob/main/LICENSE")" target="_blank" rel="noopener">MIT</a>.</li>
+        <li>
+            Programmes des candidats (<code>programmes.json</code>) :
+            <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" target="_blank" rel="noopener">CC BY 4.0</a>, chaque mesure citant sa source.
+        </li>
+        <li>Données de référence (<code>baseline.json</code>) : dérivées d'Eurostat, CC BY 4.0, © Union européenne.</li>
+    </ul>
+
+    <h2>Données personnelles</h2>
+    <p>
+        Le site lui-même ne collecte aucune donnée personnelle : pas de compte, pas de cookie, pas de traceur,
+        pas de mesure d'audience. Votre scénario et vos priorités ne sont conservés que dans l'adresse de la page.
+    </p>
+    <p>
+        L'hébergeur peut conserver des journaux techniques (dont l'adresse IP) selon
+        <a href="https://render.com/privacy" target="_blank" rel="noopener">sa propre politique</a>.
+        Signaler une erreur passe par GitHub, soumis à
+        <a href="https://docs.github.com/fr/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">sa déclaration de confidentialité</a>.
+    </p>
+
+    <h2>Responsabilité</h2>
+    <p>
+        Budget France est un outil pédagogique : ses résultats ne constituent ni un conseil ni une prévision.
+        Hypothèses et limites : voir la <a href="methode">méthode</a>.
+    </p>
+</article>

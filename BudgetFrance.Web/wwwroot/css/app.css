@@ -45,7 +45,9 @@ body {
 
 .page { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
 
-.page-header h1 { font-size: 1.8rem; line-height: 1.2; margin: 0 0 8px; }
+a { color: var(--accent); }
+
+.page-header h1, .prose h1 { font-size: 1.8rem; line-height: 1.2; margin: 0 0 8px; }
 .page-header p { color: var(--muted); margin: 0 0 24px; max-width: 60ch; }
 
 .loading { color: var(--muted); }
@@ -178,6 +180,16 @@ section h2 small { color: var(--muted); font-weight: 500; font-size: 1rem; }
 }
 
 .page-footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 16px; }
+
+/* Pied de page commun */
+.site-footer { max-width: 1200px; margin: 0 auto; padding: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+
+/* Pages de texte : méthode, mentions légales */
+.prose { max-width: 70ch; overflow-wrap: break-word; }
+.prose h2 { font-size: 1.25rem; margin: 32px 0 8px; }
+.prose ul { padding-left: 20px; }
+.prose li { margin-bottom: 4px; }
 
 /* Éléments du template Blazor */
 #blazor-error-ui {

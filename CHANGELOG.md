@@ -18,11 +18,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 - Licence MIT (code) et CC BY 4.0 (`programmes.json`).
 - Intégration continue (tests sur PR et `develop`) et déploiement sur Render via la branche `deploy`, construite par GitHub Actions.
+- Pages « Méthode » (périmètre, calcul statique, règles de faisabilité, sources Eurostat, charte de neutralité, règles d'encodage, limites ; chiffres de l'année de référence lus dans les données) et « Mentions légales ».
+- Pied de page commun : simulateur, méthode, mentions légales, code source, signalement d'erreur.
+- « Signaler une erreur d'encodage » sur chaque programme, vers une issue GitHub pré-remplie.
+- Modèle d'issue « Erreur d'encodage » (correction sourcée obligatoire).
 
 ### Modifié
 
 - Verdict compact sur mobile : détails repliables.
 - Accessibilité : verdict annoncé aux lecteurs d'écran, curseurs avec valeur textuelle, unités insécables.
+- Actions GitHub `checkout` et `setup-dotnet` en v5.
+- README : URL du site ; règles, sources et limites publiées sur `/methode`.
+- Pied de page de l'accueil allégé : renvoi vers la méthode.
 
 ## [0.1.0] - 2026-10-03
 

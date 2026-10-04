@@ -1,0 +1,160 @@
+@page "/methode"
+@using System.Text.Json
+@using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
+@inject HttpClient Http
+
+<PageTitle>Méthode — Budget France</PageTitle>
+
+<article class="prose">
+    <h1>Méthode et limites</h1>
+    <p>
+        Comment le simulateur calcule, d'où viennent ses chiffres et ce qu'il ne sait pas faire.
+        Les mêmes règles s'appliquent à votre budget, aux pistes de financement et aux programmes des candidats.
+    </p>
+
+    <h2>Chiffres de l'année de référence</h2>
+    @if (loadFailed)
+    {
+        <p class="loading">Chiffres indisponibles.</p>
+    }
+    else if (baseline is null)
+    {
+        <p class="loading">Chargement des données…</p>
+    }
+    else
+    {
+        <ul>
+            <li>Année de référence : @baseline.Year, données extraites d'Eurostat le @baseline.ExtractedOn.ToString("d").</li>
+            <li>Dette publique : @baseline.DebtPctGdp.ToString("N1")&nbsp;% du PIB ; croissance nominale du PIB : @baseline.NominalGrowthPct.ToString("N2")&nbsp;%.</li>
+            <li>Déficit qui stabilise la dette : @FeasibilityEvaluator.DebtStabilisingDeficit(baseline.DebtPctGdp, baseline.NominalGrowthPct).ToString("N2")&nbsp;% du PIB.</li>
+            <li>Plafond de déficit européen : @FeasibilityEvaluator.EuDeficitLimitPctGdp.ToString("N0")&nbsp;% du PIB.</li>
+            <li>
+                Prélèvements obligatoires dans l'UE : de @baseline.TaxBurdenPeers.MinPctGdp.ToString("N1")&nbsp;% (@baseline.TaxBurdenPeers.MinCountry)
+                à @baseline.TaxBurdenPeers.MaxPctGdp.ToString("N1")&nbsp;% du PIB (@baseline.TaxBurdenPeers.MaxCountry).
+            </li>
+            <li>Variation d'un poste : ±@Scenario.MaxChangePct&nbsp;% au plus.</li>
+        </ul>
+    }
+
+    <h2>Périmètre</h2>
+    <p>
+        Toutes les administrations publiques (APU, secteur S13 de la comptabilité nationale) : État, Sécurité sociale
+        et collectivités locales. Les dépenses sont classées par fonction selon la nomenclature COFOG.
+        Ce n'est pas le budget de l'État voté en loi de finances (LOLF) : la santé et les retraites, par exemple,
+        relèvent de la Sécurité sociale et figurent ici.
+    </p>
+
+    <h2>Calcul statique</h2>
+    <p>
+        Chaque variation s'applique au montant de l'année de référence : une hausse d'impôt de 10&nbsp;% est supposée
+        rapporter 10&nbsp;% de plus. Le calcul ignore les effets sur l'activité, les comportements et la charge de la dette.
+    </p>
+    <ul>
+        <li>La charge de la dette et les autres recettes sont verrouillées : elles ne se modifient pas.</li>
+        <li>La CSG est comptée avec l'impôt sur le revenu, comme en comptabilité nationale ; Eurostat ne permet pas de les séparer.</li>
+        <li>La fonction « Retraites et vieillesse » (COFOG GF1002) inclut aussi la dépendance des personnes âgées.</li>
+        <li>L'Irlande est exclue des comparaisons européennes : son PIB, gonflé par les multinationales, n'est pas comparable.</li>
+    </ul>
+
+    <h2>Règles de faisabilité</h2>
+    <ul>
+        <li>
+            <strong>Non soutenable</strong> si le déficit dépasse @FeasibilityEvaluator.EuDeficitLimitPctGdp.ToString("N0")&nbsp;% du PIB,
+            ou s'il fait augmenter la dette : le déficit qui la stabilise vaut d* = D × g / (1 + g),
+            D étant la dette en % du PIB et g la croissance nominale de l'année de référence.
+        </li>
+        <li>
+            <strong>Faisable, mais sans équivalent dans l'UE</strong> si un poste de dépense ou le taux de prélèvements
+            obligatoires sort de la fourchette min–max des États membres (hors Irlande). Les postes verrouillés ne comptent pas.
+        </li>
+        <li><strong>Faisable</strong> sinon.</li>
+    </ul>
+
+    <h2>Sources des données</h2>
+    <p>Toutes les données viennent d'Eurostat :</p>
+    <ul>
+        @foreach (var (dataset, usage) in Datasets)
+        {
+            <li><a href="https://ec.europa.eu/eurostat/databrowser/view/@dataset/default/table" target="_blank" rel="noopener">@dataset</a> : @usage</li>
+        }
+    </ul>
+    <p>Données sous licence CC BY 4.0, © Union européenne.</p>
+
+    <h2>Priorités</h2>
+    <p>
+        Chaque priorité regroupe des postes COFOG. Elle met ces postes en avant et indique s'ils sont renforcés,
+        maintenus ou réduits ; elle ne change pas le verdict. Un thème transversal n'a pas de fonction COFOG propre :
+        il est approximé, et le budget vert comme le document de politique transversale « égalité » ne couvrent que l'État.
+    </p>
+    @if (baseline is not null)
+    {
+        <ul>
+            @foreach (var priority in baseline.Priorities.Where(p => p.Note is not null))
+            {
+                <li>
+                    <strong>@priority.Label</strong> = @string.Join(" + ", priority.LineCodes.Select(code => LineLabels.Short(baseline, code))).
+                    @priority.Note
+                </li>
+            }
+        </ul>
+    }
+
+    <h2>Pistes de financement</h2>
+    <p>
+        Tant que le budget n'est pas soutenable, le simulateur propose des pistes qui comblent l'effort restant :
+        hausse d'un panier de recettes, économies hors de vos priorités, ou moitié-moitié. Chaque piste applique un même
+        pourcentage entier aux postes concernés, borné à ±@Scenario.MaxChangePct&nbsp;%, et passe par le même calcul.
+        Le procédé est déterministe : mêmes choix, mêmes pistes. Une piste bornée peut rester insuffisante.
+    </p>
+
+    <h2>Programmes 2027 : charte de neutralité</h2>
+    <ul>
+        <li>Une même règle pour tous les candidats, présentés par ordre alphabétique, sans score ni classement.</li>
+        <li>Chaque mesure cite sa source ; aucun chiffre n'est inventé ni complété.</li>
+        <li>Les effets revendiqués sans poste budgétaire (croissance, lutte contre la fraude…) sont affichés, mais pas calculés.</li>
+    </ul>
+    <p>Règles d'encodage :</p>
+    <ul>
+        <li>une mesure = un montant annuel en Md€ en régime de croisière, appliqué à l'année de référence ;</li>
+        <li>les mesures d'un même poste sont additionnées, puis converties en % entier du poste, arrondi au plus proche ;</li>
+        <li>un effet sans poste n'est rattaché à aucun poste et n'entre pas dans le calcul ;</li>
+        <li>une seule source par mesure, de préférence un chiffrage indépendant.</li>
+    </ul>
+    <p>
+        Limite : l'arrondi au % entier donne une granularité d'environ 2,5&nbsp;Md€ sur un poste comme la santé ;
+        une petite mesure isolée peut s'arrondir à zéro.
+    </p>
+
+    <h2>Signaler une erreur</h2>
+    <p>
+        Une donnée fausse, une mesure mal encodée ? <a href="@SiteLinks.NewIssue" target="_blank" rel="noopener">Ouvrez un signalement</a>
+        en citant une source : toute correction doit être sourcée.
+    </p>
+</article>
+
+@code {
+    private static readonly (string Code, string Usage)[] Datasets =
+    [
+        ("gov_10a_exp", "dépenses par fonction COFOG, France (Md€) et pays de l'UE (% du PIB)"),
+        ("gov_10a_main", "recettes totales, TVA, impôts sur la production et sur le revenu, cotisations, impôts en capital"),
+        ("gov_10a_taxag", "répartition impôt sur le revenu / impôt sur les sociétés, prélèvements obligatoires des pays de l'UE"),
+        ("nama_10_gdp", "PIB en valeur et croissance nominale"),
+        ("gov_10dd_edpt1", "dette publique (% du PIB)"),
+    ];
+
+    private Baseline? baseline;
+    private bool loadFailed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            baseline = await Http.GetFromJsonAsync<Baseline>("data/baseline.json");
+        }
+        catch (Exception e) when (e is HttpRequestException or JsonException)
+        {
+            loadFailed = true;
+        }
+    }
+}
