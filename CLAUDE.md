@@ -1,6 +1,6 @@
 # BudgetFrance
 
-Simulateur citoyen de la dépense publique française : préférences par domaine (COFOG), ajustement des recettes, verdict de faisabilité (3 % de déficit, stabilisation de la dette, comparaison aux pays de l'UE). Voir `README.md` pour les commandes, les sources Eurostat et les limites.
+Simulateur citoyen de la dépense publique française : préférences par domaine (COFOG), ajustement des recettes, verdict de faisabilité (3 % de déficit, stabilisation de la dette, comparaison aux pays de l'UE). Voir `README.md` pour les commandes et le déploiement ; la méthode publique (sources Eurostat, règles, limites) est `BudgetFrance.Web/Pages/Methode.razor`.
 
 ## Architecture
 
