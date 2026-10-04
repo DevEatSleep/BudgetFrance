@@ -1,0 +1,46 @@
+@using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
+
+<section class="proposals" aria-labelledby="proposals-title">
+    <h2 id="proposals-title">Pistes pour boucler votre budget <small>il manque @Gap.ToString("N0")&nbsp;Md€</small></h2>
+    <p class="proposals-intro">
+        Chaque piste comble l'écart avec les 3&nbsp;% et la stabilisation de la dette, sans toucher aux dépenses de vos priorités.
+    </p>
+
+    <div class="proposal-grid">
+        @foreach (var proposal in Proposals)
+        {
+            <article class="proposal @VerdictText.CssClass(proposal.Result.Verdict)">
+                <h3>@Title(proposal)</h3>
+                <ul class="proposal-adjustments">
+                    @foreach (var group in proposal.Adjustments.GroupBy(a => a.Value))
+                    {
+                        <li><strong>@group.Key.ToString("+0;-0")&nbsp;%</strong> : @string.Join(", ", group.Select(a => LineLabels.Short(Baseline, a.Key)))</li>
+                    }
+                </ul>
+                <p class="proposal-result">
+                    <span class="verdict-title">@VerdictText.Title(proposal.Result.Verdict)</span>
+                    <small>
+                        Déficit @proposal.Result.DeficitPctGdp.ToString("N1")&nbsp;% ·
+                        prélèvements @proposal.Result.TaxBurdenPctGdp.ToString("N1")&nbsp;% du PIB
+                    </small>
+                </p>
+                <button type="button" class="action" @onclick="() => OnApply.InvokeAsync(proposal)">Appliquer</button>
+            </article>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public Baseline Baseline { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<Proposal> Proposals { get; set; } = [];
+    [Parameter, EditorRequired] public decimal Gap { get; set; }
+    [Parameter] public EventCallback<Proposal> OnApply { get; set; }
+
+    private static string Title(Proposal proposal) => proposal.Kind switch
+    {
+        ProposalKind.Taxes => proposal.Package!.Label,
+        ProposalKind.Savings => "Économies hors priorités",
+        _ => "Moitié recettes, moitié économies"
+    };
+}

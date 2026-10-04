@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BudgetFrance.Domain/BudgetFrance.Domain.csproj" />
+  <Project Path="BudgetFrance.Importer/BudgetFrance.Importer.csproj" />
+  <Project Path="BudgetFrance.Tests/BudgetFrance.Tests.csproj" />
+  <Project Path="BudgetFrance.Web/BudgetFrance.Web.csproj" />
+</Solution>

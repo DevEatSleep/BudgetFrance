@@ -1,0 +1,378 @@
+{
+  "year": 2024,
+  "gdp": 2935.2362,
+  "debtPctGdp": 112.6,
+  "nominalGrowthPct": 3.58,
+  "spending": [
+    {
+      "code": "SERVICES_GENERAUX",
+      "label": "Services publics généraux (hors dette)",
+      "amount": 122.233,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 4.2,
+        "minPctGdp": 2.4,
+        "minCountry": "Bulgarie",
+        "maxPctGdp": 5.5,
+        "maxCountry": "Finlande"
+      }
+    },
+    {
+      "code": "DETTE",
+      "label": "Charge de la dette",
+      "amount": 58.8702,
+      "locked": true,
+      "peers": {
+        "euAveragePctGdp": 1.9,
+        "minPctGdp": 0.4,
+        "minCountry": "Luxembourg",
+        "maxPctGdp": 5.0,
+        "maxCountry": "Hongrie"
+      }
+    },
+    {
+      "code": "DEFENSE",
+      "label": "Défense",
+      "amount": 54.199,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 1.5,
+        "minPctGdp": 0.5,
+        "minCountry": "Malte",
+        "maxPctGdp": 3.7,
+        "maxCountry": "Estonie"
+      }
+    },
+    {
+      "code": "SECURITE",
+      "label": "Ordre et sécurité publics",
+      "amount": 52.113,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 1.7,
+        "minPctGdp": 1.0,
+        "minCountry": "Danemark",
+        "maxPctGdp": 3.2,
+        "maxCountry": "Lettonie"
+      }
+    },
+    {
+      "code": "ENERGIE",
+      "label": "Combustibles et énergie",
+      "amount": 15.4608,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 0.6,
+        "minPctGdp": 0.1,
+        "minCountry": "Belgique",
+        "maxPctGdp": 1.9,
+        "maxCountry": "Malte"
+      }
+    },
+    {
+      "code": "TRANSPORTS",
+      "label": "Transports",
+      "amount": 60.6889,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 2.5,
+        "minPctGdp": 0.8,
+        "minCountry": "Chypre",
+        "maxPctGdp": 4.3,
+        "maxCountry": "Lettonie"
+      }
+    },
+    {
+      "code": "ECONOMIE",
+      "label": "Autres affaires économiques (aides, agriculture, R&D…)",
+      "amount": 89.9231,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 2.2,
+        "minPctGdp": 1.0,
+        "minCountry": "Danemark",
+        "maxPctGdp": 3.5,
+        "maxCountry": "Belgique"
+      }
+    },
+    {
+      "code": "ENVIRONNEMENT",
+      "label": "Protection de l'environnement",
+      "amount": 30.2851,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 0.8,
+        "minPctGdp": 0.2,
+        "minCountry": "Finlande",
+        "maxPctGdp": 1.6,
+        "maxCountry": "Pays-Bas"
+      }
+    },
+    {
+      "code": "LOGEMENT",
+      "label": "Logement et équipements collectifs",
+      "amount": 42.1286,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 0.7,
+        "minPctGdp": 0.3,
+        "minCountry": "Danemark",
+        "maxPctGdp": 2.1,
+        "maxCountry": "Chypre"
+      }
+    },
+    {
+      "code": "SANTE",
+      "label": "Santé",
+      "amount": 261.1563,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 7.3,
+        "minPctGdp": 4.7,
+        "minCountry": "Hongrie",
+        "maxPctGdp": 9.5,
+        "maxCountry": "Autriche"
+      }
+    },
+    {
+      "code": "CULTURE",
+      "label": "Loisirs, culture et culte",
+      "amount": 43.0676,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 1.2,
+        "minPctGdp": 0.5,
+        "minCountry": "Chypre",
+        "maxPctGdp": 2.5,
+        "maxCountry": "Hongrie"
+      }
+    },
+    {
+      "code": "ENSEIGNEMENT",
+      "label": "Enseignement",
+      "amount": 148.6396,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 4.7,
+        "minPctGdp": 3.9,
+        "minCountry": "Grèce",
+        "maxPctGdp": 7.3,
+        "maxCountry": "Suède"
+      }
+    },
+    {
+      "code": "RETRAITES",
+      "label": "Retraites et vieillesse",
+      "amount": 391.9543,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 10.7,
+        "minPctGdp": 5.9,
+        "minCountry": "Malte",
+        "maxPctGdp": 15.5,
+        "maxCountry": "Finlande"
+      }
+    },
+    {
+      "code": "FAMILLE",
+      "label": "Famille et enfance",
+      "amount": 66.7114,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 2.0,
+        "minPctGdp": 0.9,
+        "minCountry": "Grèce",
+        "maxPctGdp": 4.1,
+        "maxCountry": "Danemark"
+      }
+    },
+    {
+      "code": "PROTECTION_SOCIALE",
+      "label": "Autre protection sociale (maladie, chômage, logement, exclusion…)",
+      "amount": 234.3631,
+      "locked": false,
+      "peers": {
+        "euAveragePctGdp": 6.9,
+        "minPctGdp": 2.2,
+        "minCountry": "Roumanie",
+        "maxPctGdp": 8.6,
+        "maxCountry": "Allemagne"
+      }
+    }
+  ],
+  "revenues": [
+    {
+      "code": "TVA",
+      "label": "TVA",
+      "amount": 207.753,
+      "locked": false,
+      "isCompulsoryLevy": true
+    },
+    {
+      "code": "IMPOTS_PRODUCTION",
+      "label": "Autres impôts sur la production (accises, taxes foncières, sur les salaires…)",
+      "amount": 248.38,
+      "locked": false,
+      "isCompulsoryLevy": true
+    },
+    {
+      "code": "IMPOTS_REVENU",
+      "label": "Impôts sur le revenu des ménages (IR, CSG, CRDS)",
+      "amount": 275.122,
+      "locked": false,
+      "isCompulsoryLevy": true
+    },
+    {
+      "code": "IMPOT_SOCIETES",
+      "label": "Impôt sur les sociétés",
+      "amount": 83.76,
+      "locked": false,
+      "isCompulsoryLevy": true
+    },
+    {
+      "code": "AUTRES_IMPOTS_COURANTS",
+      "label": "Autres impôts courants (taxe d'habitation résiduelle, IFI…)",
+      "amount": 6.801,
+      "locked": false,
+      "isCompulsoryLevy": true
+    },
+    {
+      "code": "IMPOTS_CAPITAL",
+      "label": "Droits de succession et de donation",
+      "amount": 21.47,
+      "locked": false,
+      "isCompulsoryLevy": true
+    },
+    {
+      "code": "COTISATIONS",
+      "label": "Cotisations sociales",
+      "amount": 483.631,
+      "locked": false,
+      "isCompulsoryLevy": true
+    },
+    {
+      "code": "AUTRES_RECETTES",
+      "label": "Autres recettes (ventes, revenus de la propriété, transferts)",
+      "amount": 176.6731,
+      "locked": true,
+      "isCompulsoryLevy": false
+    }
+  ],
+  "taxBurdenPeers": {
+    "euAveragePctGdp": 40.3,
+    "minPctGdp": 28.8,
+    "minCountry": "Roumanie",
+    "maxPctGdp": 45.5,
+    "maxCountry": "Danemark"
+  },
+  "priorities": [
+    {
+      "code": "SANTE",
+      "label": "Santé",
+      "lineCodes": [
+        "SANTE"
+      ],
+      "note": null
+    },
+    {
+      "code": "EDUCATION",
+      "label": "Éducation",
+      "lineCodes": [
+        "ENSEIGNEMENT"
+      ],
+      "note": null
+    },
+    {
+      "code": "CLIMAT",
+      "label": "Climat et environnement",
+      "lineCodes": [
+        "ENVIRONNEMENT",
+        "ENERGIE",
+        "TRANSPORTS"
+      ],
+      "note": "Approximation : inclut aussi les aides aux énergies fossiles et la route."
+    },
+    {
+      "code": "SECURITE",
+      "label": "Sécurité et défense",
+      "lineCodes": [
+        "SECURITE",
+        "DEFENSE"
+      ],
+      "note": null
+    },
+    {
+      "code": "RETRAITES",
+      "label": "Retraites",
+      "lineCodes": [
+        "RETRAITES"
+      ],
+      "note": null
+    },
+    {
+      "code": "SOLIDARITE",
+      "label": "Solidarité",
+      "lineCodes": [
+        "PROTECTION_SOCIALE",
+        "LOGEMENT"
+      ],
+      "note": null
+    },
+    {
+      "code": "EGALITE",
+      "label": "Égalité femmes-hommes",
+      "lineCodes": [
+        "FAMILLE"
+      ],
+      "note": "Approximation : garde d'enfants et congés parentaux. Aucune donnée publique ne ventile la dépense par sexe."
+    },
+    {
+      "code": "CULTURE",
+      "label": "Culture",
+      "lineCodes": [
+        "CULTURE"
+      ],
+      "note": null
+    }
+  ],
+  "taxPackages": [
+    {
+      "code": "REPARTI",
+      "label": "Effort fiscal réparti",
+      "lineCodes": [
+        "TVA",
+        "IMPOTS_PRODUCTION",
+        "IMPOTS_REVENU",
+        "IMPOT_SOCIETES",
+        "AUTRES_IMPOTS_COURANTS",
+        "IMPOTS_CAPITAL",
+        "COTISATIONS"
+      ]
+    },
+    {
+      "code": "CONSOMMATION",
+      "label": "Consommation (TVA)",
+      "lineCodes": [
+        "TVA"
+      ]
+    },
+    {
+      "code": "MENAGES",
+      "label": "Revenus et patrimoine des ménages",
+      "lineCodes": [
+        "IMPOTS_REVENU",
+        "AUTRES_IMPOTS_COURANTS",
+        "IMPOTS_CAPITAL"
+      ]
+    },
+    {
+      "code": "ENTREPRISES",
+      "label": "Entreprises",
+      "lineCodes": [
+        "IMPOT_SOCIETES",
+        "IMPOTS_PRODUCTION"
+      ]
+    }
+  ],
+  "extractedOn": "2026-10-04"
+}

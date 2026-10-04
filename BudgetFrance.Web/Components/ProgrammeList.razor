@@ -1,0 +1,80 @@
+@using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
+
+<section class="proposals" aria-labelledby="programmes-title">
+    <h2 id="programmes-title">Les programmes 2027 <small>mis à jour le @UpdatedOn.ToString("d")</small></h2>
+    <p class="proposals-intro">
+        Chaque programme est passé au même calcul statique que votre budget, candidats par ordre alphabétique.
+        Les effets revendiqués sans poste budgétaire (croissance, lutte contre la fraude…) sont listés mais non retenus.
+        Pas de score : comparez le sens des choix sur vos priorités.
+    </p>
+
+    <div class="proposal-grid">
+        @foreach (var evaluation in Programmes)
+        {
+            var programme = evaluation.Programme;
+            var result = evaluation.Result;
+            <article class="proposal @VerdictText.CssClass(result.Verdict)">
+                <h3>@programme.Candidate <small>@programme.Party</small></h3>
+
+                @if (SelectedPriorities.Count == 0)
+                {
+                    <p class="programme-hint">Choisissez vos priorités pour les comparer à ce programme.</p>
+                }
+                else
+                {
+                    <ul class="proposal-adjustments">
+                        @foreach (var priority in Baseline.Priorities.Where(p => SelectedPriorities.Contains(p.Code)))
+                        {
+                            var theirs = result.Priorities.Single(o => o.Code == priority.Code).Trend;
+                            var mine = Mine.Single(o => o.Code == priority.Code).Trend;
+                            <li class="@(theirs == mine ? "same-direction" : "different-direction")">
+                                <strong>@priority.Label</strong> : @VerdictText.Trend(theirs)
+                                <small>(vous : @VerdictText.Trend(mine))</small>
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <p class="proposal-result">
+                    <span class="verdict-title">@VerdictText.Title(result.Verdict)</span>
+                    <small>
+                        Déficit @result.DeficitPctGdp.ToString("N1")&nbsp;% ·
+                        prélèvements @result.TaxBurdenPctGdp.ToString("N1")&nbsp;% du PIB
+                    </small>
+                </p>
+
+                <details class="programme-measures">
+                    <summary>Mesures et sources</summary>
+                    <ul>
+                        @foreach (var measure in programme.Measures.OrderBy(m => m.LineCode is null))
+                        {
+                            <li>
+                                @measure.Label : <strong>@measure.AmountBn.ToString("+#,##0.#;-#,##0.#")&nbsp;Md€</strong>
+                                <small>
+                                    @(measure.LineCode is null ? "non retenue" : LineLabels.Short(Baseline, measure.LineCode)) ·
+                                    <a href="@measure.SourceUrl" target="_blank" rel="noopener">@measure.SourceLabel</a>
+                                </small>
+                            </li>
+                        }
+                    </ul>
+                    <small>Programme publié le @programme.PublishedOn.ToString("d").</small>
+                </details>
+
+                <button type="button" class="action" @onclick="() => OnApply.InvokeAsync(evaluation.Scenario)">Partir de ce programme</button>
+            </article>
+        }
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public Baseline Baseline { get; set; } = default!;
+    [Parameter, EditorRequired] public IReadOnlyList<ProgrammeEvaluation> Programmes { get; set; } = [];
+    [Parameter, EditorRequired] public DateOnly UpdatedOn { get; set; }
+
+    /// <summary>Priorités du scénario de l'utilisateur, pour la comparaison.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<PriorityOutcome> Mine { get; set; } = [];
+
+    [Parameter] public IReadOnlySet<string> SelectedPriorities { get; set; } = new HashSet<string>();
+    [Parameter] public EventCallback<Scenario> OnApply { get; set; }
+}

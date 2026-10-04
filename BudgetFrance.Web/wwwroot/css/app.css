@@ -1,0 +1,206 @@
+:root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --text: #1d1d1f;
+    --muted: #6b6b70;
+    --border: #e2e2e0;
+    --accent: #1f5fbf;
+    --ok: #1e7f4f;
+    --ok-bg: #e6f4ec;
+    --warn: #9a6200;
+    --warn-bg: #fdf3e1;
+    --ko: #b3261e;
+    --ko-bg: #fbe9e7;
+    --range: #c9d8f0;
+    color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #141416;
+        --surface: #1e1e21;
+        --text: #ececee;
+        --muted: #9a9aa2;
+        --border: #34343a;
+        --accent: #7aa7ec;
+        --ok: #6fcf9a;
+        --ok-bg: #16301f;
+        --warn: #f0b85c;
+        --warn-bg: #33270f;
+        --ko: #f28b82;
+        --ko-bg: #3a1a18;
+        --range: #2c4268;
+        color-scheme: dark;
+    }
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.page { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+
+.page-header h1 { font-size: 1.8rem; line-height: 1.2; margin: 0 0 8px; }
+.page-header p { color: var(--muted); margin: 0 0 24px; max-width: 60ch; }
+
+.loading { color: var(--muted); }
+
+/* Mise en page : curseurs à gauche, verdict collant à droite (au-dessus sur mobile). */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+.layout aside { position: sticky; top: 16px; }
+
+@media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .layout aside { order: -1; top: 0; z-index: 1; }
+}
+
+section { margin-bottom: 32px; }
+
+/* Pistes de financement */
+.proposals-intro { margin: -4px 0 12px; color: var(--muted); font-size: 0.9rem; }
+.proposal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+.proposal { display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 12px 14px; }
+.proposal h3 { margin: 0; font-size: 1rem; }
+.proposal-adjustments { list-style: none; padding: 0; margin: 0; font-size: 0.88rem; }
+.proposal-result { margin: auto 0 0; font-size: 0.9rem; }
+.proposal-result .verdict-title { display: block; font-size: 0.95rem; }
+.proposal-result small { color: var(--muted); }
+
+/* Programmes 2027 (cartes des pistes) */
+.proposal h3 small { color: var(--muted); font-weight: 500; }
+.programme-hint { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.same-direction::before { content: "✓ "; color: var(--ok); }
+.different-direction::before { content: "✗ "; color: var(--ko); }
+.proposal-adjustments small { color: var(--muted); }
+.programme-measures { font-size: 0.85rem; }
+.programme-measures summary { cursor: pointer; color: var(--muted); }
+.programme-measures ul { padding-left: 18px; margin: 6px 0; }
+.programme-measures li small, .programme-measures > small { display: block; color: var(--muted); }
+
+/* Priorités du citoyen */
+.priorities { margin-bottom: 24px; }
+.priority-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.priority-chip { padding: 6px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--text); font: inherit; font-size: 0.92rem; cursor: pointer; }
+.priority-chip:hover:not(:disabled) { border-color: var(--accent); }
+.priority-chip[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 600; }
+.priority-chip:disabled { opacity: 0.45; cursor: not-allowed; }
+.priority-note { margin: 8px 0 0; color: var(--muted); font-size: 0.85rem; }
+.line-priority { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; background: var(--range); color: var(--text); font-size: 0.75rem; font-weight: 600; vertical-align: middle; }
+section h2 { display: flex; justify-content: space-between; align-items: baseline; font-size: 1.25rem; margin: 0 0 12px; }
+section h2 small { color: var(--muted); font-weight: 500; font-size: 1rem; }
+
+/* Poste budgétaire */
+.line { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+.line.locked { opacity: 0.7; }
+.line-head { display: flex; justify-content: space-between; gap: 12px; }
+.line-label em { color: var(--muted); font-size: 0.85rem; }
+.line-amount { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; text-align: right; }
+.line-delta { display: block; font-size: 0.8rem; }
+.line-delta.up { color: var(--accent); }
+.line-delta.down { color: var(--warn); }
+
+.line-control { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+.slider { position: relative; flex: 1; min-width: 0; display: flex; }
+.slider input[type=range] { flex: 1; min-width: 0; margin: 0; accent-color: var(--accent); }
+/* Repère du 0 % : les bornes sont symétriques, le zéro est au milieu. */
+.slider::after { content: ""; position: absolute; left: 50%; bottom: -5px; width: 2px; height: 5px; margin-left: -1px; background: var(--muted); pointer-events: none; }
+.line-reset { width: 1.75rem; height: 1.75rem; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: transparent; color: var(--muted); font: inherit; line-height: 1; cursor: pointer; }
+.line-reset:hover { color: var(--accent); border-color: var(--accent); }
+.line-reset.hidden { visibility: hidden; }
+.line-change { width: 3.5rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.line-change.up { color: var(--accent); font-weight: 600; }
+.line-change.down { color: var(--warn); font-weight: 600; }
+
+/* Barre de comparaison européenne */
+.peers { margin-top: 8px; }
+.peers-track { position: relative; height: 10px; background: var(--border); border-radius: 5px; }
+.peers-range { position: absolute; top: 0; bottom: 0; background: var(--range); border-radius: 5px; }
+.peers-average { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--muted); }
+.peers-france { position: absolute; top: -3px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); }
+.peers-france.outside { background: var(--warn); }
+.peers-legend { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; font-size: 0.78rem; color: var(--muted); }
+.peers-you { text-align: center; }
+.peers-you.outside { color: var(--warn); font-weight: 600; }
+
+@media (max-width: 520px) {
+    .peers-legend { flex-wrap: wrap; }
+    .peers-you { order: -1; width: 100%; text-align: left; }
+}
+
+/* Verdict */
+.verdict { background: var(--surface); border: 2px solid var(--border); border-radius: 12px; padding: 16px; }
+.verdict-feasible { border-color: var(--ok); }
+.verdict-feasiblebutunprecedented { border-color: var(--warn); }
+.verdict-notfeasible { border-color: var(--ko); }
+.verdict-title { font-size: 1.3rem; font-weight: 700; margin: 0; }
+.verdict-feasible .verdict-title { color: var(--ok); }
+.verdict-feasiblebutunprecedented .verdict-title { color: var(--warn); }
+.verdict-notfeasible .verdict-title { color: var(--ko); }
+.verdict-balance { margin: 4px 0 12px; }
+
+/* Détails : repliables sur mobile, toujours visibles sur grand écran quand le navigateur le permet. */
+.verdict-details summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; margin-bottom: 8px; }
+@supports selector(::details-content) {
+    @media (min-width: 861px) {
+        .verdict-details summary { display: none; }
+        .verdict-details::details-content { content-visibility: visible; }
+    }
+}
+
+.checks-title { margin: 0 0 6px; font-weight: 600; }
+.checks { list-style: none; padding: 0; margin: 0 0 12px; }
+.checks li { padding: 8px 10px 8px 34px; border-radius: 8px; margin-bottom: 6px; position: relative; font-size: 0.92rem; }
+.checks li::before { position: absolute; left: 10px; font-weight: 700; }
+.checks li small { display: block; color: var(--muted); }
+.checks .gap { display: block; }
+.checks .ok { background: var(--ok-bg); }
+.checks .ok::before { content: "✓"; color: var(--ok); }
+.checks .warn { background: var(--warn-bg); }
+.checks .warn::before { content: "!"; color: var(--warn); }
+.checks .ko { background: var(--ko-bg); }
+.checks .ko::before { content: "✗"; color: var(--ko); }
+
+.actions { display: flex; flex-direction: column; gap: 6px; }
+.action { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--text); font: inherit; cursor: pointer; }
+.action:hover { border-color: var(--accent); }
+
+@media (max-width: 860px) {
+    .verdict { padding: 12px; }
+    .verdict-title { font-size: 1.1rem; }
+    .verdict-balance { margin-bottom: 4px; }
+    .verdict-details summary { margin-bottom: 0; }
+    .verdict-details[open] summary { margin-bottom: 8px; }
+}
+
+.page-footer { color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 16px; }
+
+/* Éléments du template Blazor */
+#blazor-error-ui {
+    background: lightyellow;
+    color: #1d1d1f;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: 0.75rem; top: 0.5rem; }
+
+.loading-progress { position: absolute; display: block; width: 8rem; height: 8rem; inset: 20vh 0 auto 0; margin: 0 auto; }
+.loading-progress circle { fill: none; stroke: var(--border); stroke-width: 0.6rem; transform-origin: 50% 50%; transform: rotate(-90deg); }
+.loading-progress circle:last-child {
+    stroke: var(--accent);
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
+    transition: stroke-dasharray 0.05s ease-in-out;
+}
+.loading-progress-text { position: absolute; text-align: center; font-weight: bold; inset: calc(20vh + 3.25rem) 0 auto 0.2rem; }
+.loading-progress-text:after { content: var(--blazor-load-percentage-text, "Chargement"); }

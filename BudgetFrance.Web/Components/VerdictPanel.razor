@@ -1,0 +1,111 @@
+@using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="verdict @VerdictText.CssClass(Result.Verdict)">
+    <p class="verdict-title" aria-live="polite">@VerdictText.Title(Result.Verdict)</p>
+
+    <p class="verdict-balance">
+        @(Result.Balance >= 0 ? "Excédent" : "Déficit") de <strong>@Math.Abs(Result.Balance).ToString("N0")&nbsp;Md€</strong>
+        (@Result.DeficitPctGdp.ToString("N1")&nbsp;% du PIB)
+    </p>
+
+    @* Repliable sur mobile pour laisser la place aux curseurs ; toujours déplié sur grand écran (CSS). *@
+    <details class="verdict-details">
+        <summary>Détails</summary>
+
+        <ul class="checks">
+            <li class="@Status(Result.DeficitWithinEuLimit)">
+                Déficit : <strong>@Result.DeficitPctGdp.ToString("N1")&nbsp;%</strong> du PIB
+                @if (!Result.DeficitWithinEuLimit)
+                {
+                    <span class="gap">Il manque <strong>@Result.GapToEuLimit.ToString("N0")&nbsp;Md€</strong> pour passer sous @EuLimit&nbsp;%</span>
+                }
+                <small>Plafond européen : @EuLimit&nbsp;%</small>
+            </li>
+            <li class="@Status(Result.DebtStabilised)">
+                Dette : @(Result.DebtStabilised ? "stable ou en baisse" : "en hausse")
+                @if (!Result.DebtStabilised)
+                {
+                    <span class="gap">Il manque <strong>@Result.GapToDebtStabilisation.ToString("N0")&nbsp;Md€</strong> pour la stabiliser</span>
+                }
+                <small>
+                    Stable si le déficit reste sous @Result.DebtStabilisingDeficitPctGdp.ToString("N1")&nbsp;% du PIB
+                    (dette @Baseline.DebtPctGdp.ToString("N1")&nbsp;%, croissance nominale @Baseline.NominalGrowthPct.ToString("N1")&nbsp;%)
+                </small>
+            </li>
+            <li class="@Status(Result.TaxBurdenWithinEuRange, blocking: false)">
+                Prélèvements obligatoires : <strong>@Result.TaxBurdenPctGdp.ToString("N1")&nbsp;%</strong> du PIB
+                <small>
+                    UE : de @Baseline.TaxBurdenPeers.MinPctGdp.ToString("N1")&nbsp;% (@Baseline.TaxBurdenPeers.MinCountry)
+                    à @Baseline.TaxBurdenPeers.MaxPctGdp.ToString("N1")&nbsp;% (@Baseline.TaxBurdenPeers.MaxCountry)
+                </small>
+            </li>
+            <li class="@Status(OutsideEuRange.Count == 0, blocking: false)">
+                @if (OutsideEuRange.Count == 0)
+                {
+                    <text>Toutes les dépenses restent dans les fourchettes européennes</text>
+                }
+                else
+                {
+                    <text>Hors fourchette européenne : @string.Join(", ", OutsideEuRange)</text>
+                }
+            </li>
+        </ul>
+
+        @if (SelectedPriorities.Count > 0)
+        {
+            <p class="checks-title">Vos priorités</p>
+            <ul class="checks">
+                @foreach (var priority in Baseline.Priorities.Where(p => SelectedPriorities.Contains(p.Code)))
+                {
+                    var outcome = Result.Priorities.Single(o => o.Code == priority.Code);
+                    <li class="@Status(outcome.Change >= 0, blocking: false)">
+                        @priority.Label : @VerdictText.Trend(outcome.Trend)
+                        <small>@outcome.Amount.ToString("N0")&nbsp;Md€ (@outcome.Change.ToString("+#,##0.0;-#,##0.0;0")&nbsp;Md€)</small>
+                    </li>
+                }
+            </ul>
+        }
+
+        @if (Modified || SelectedPriorities.Count > 0)
+        {
+            <div class="actions">
+                <button type="button" class="action" @onclick="Share">@(copied ? "Lien copié ✓" : "Partager ce scénario")</button>
+                @if (Modified)
+                {
+                    <button type="button" class="action" @onclick="OnReset">Revenir au budget @Baseline.Year</button>
+                }
+            </div>
+        }
+    </details>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Baseline Baseline { get; set; } = default!;
+    [Parameter, EditorRequired] public FeasibilityResult Result { get; set; } = default!;
+    [Parameter] public IReadOnlySet<string> SelectedPriorities { get; set; } = new HashSet<string>();
+    [Parameter] public bool Modified { get; set; }
+    [Parameter] public EventCallback OnReset { get; set; }
+
+    private bool copied;
+
+    private static string EuLimit => FeasibilityEvaluator.EuDeficitLimitPctGdp.ToString("N0");
+
+    private List<string> OutsideEuRange => Result.Spending
+        .Where(p => !p.WithinEuRange)
+        .Select(p => Baseline.Spending.Single(l => l.Code == p.Code).Label)
+        .ToList();
+
+    private static string Status(bool ok, bool blocking = true) => ok ? "ok" : blocking ? "ko" : "warn";
+
+    // Le scénario vit dans l'URL : la partager suffit à le partager.
+    private async Task Share()
+    {
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", Navigation.Uri);
+        copied = true;
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        copied = false;
+    }
+}

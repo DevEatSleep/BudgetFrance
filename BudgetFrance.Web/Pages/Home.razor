@@ -1,0 +1,178 @@
+@page "/"
+@using System.Text.Json
+@using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Budget France — simulateur</PageTitle>
+
+<header class="page-header">
+    <h1>Et si c'était vous qui faisiez le budget&nbsp;?</h1>
+    <p>Augmentez ou réduisez la dépense publique par domaine, ajustez les impôts, et vérifiez si votre budget tient la route.</p>
+</header>
+
+@if (loadFailed)
+{
+    <p class="loading">Impossible de charger les données. <a href="">Recharger</a></p>
+}
+else if (baseline is null || result is null)
+{
+    <p class="loading">Chargement des données…</p>
+}
+else
+{
+    <PriorityPicker Priorities="baseline.Priorities" Selected="priorities" OnToggle="TogglePriority" />
+
+    @if (programmes.Count > 0)
+    {
+        <ProgrammeList Baseline="baseline" Programmes="programmes" UpdatedOn="programmesUpdatedOn"
+                       Mine="result.Priorities" SelectedPriorities="priorities" OnApply="ApplyScenario" />
+    }
+
+    <div class="layout">
+        <div class="lines">
+            @if (proposals.Count > 0)
+            {
+                <ProposalList Baseline="baseline" Proposals="proposals" Gap="result.RemainingGap" OnApply="proposal => ApplyScenario(proposal.Scenario)" />
+            }
+
+            <section>
+                <h2>Dépenses <small>@result.TotalSpending.ToString("N0")&nbsp;Md€ @ChangeSuffix(result.SpendingChange)</small></h2>
+                @* Les postes des priorités choisies d'abord ; OrderBy est stable, l'ordre COFOG est conservé sinon. *@
+                @foreach (var line in baseline.Spending.OrderBy(l => PriorityLabelFor(l.Code) is null))
+                {
+                    var position = result.Spending.Single(p => p.Code == line.Code);
+                    <LineSlider Label="@line.Label" Amount="position.Amount" Change="position.Change" Locked="line.Locked"
+                                PriorityLabel="@PriorityLabelFor(line.Code)"
+                                ChangePct="changes.GetValueOrDefault(line.Code)"
+                                ChangePctChanged="value => SetChange(line.Code, value)"
+                                Peers="line.Peers" PctGdp="position.PctGdp" WithinEuRange="position.WithinEuRange" />
+                }
+            </section>
+
+            <section>
+                <h2>Recettes <small>@result.TotalRevenue.ToString("N0")&nbsp;Md€ @ChangeSuffix(result.RevenueChange)</small></h2>
+                @foreach (var line in baseline.Revenues)
+                {
+                    var position = result.Revenues.Single(r => r.Code == line.Code);
+                    <LineSlider Label="@line.Label" Amount="position.Amount" Change="position.Change" Locked="line.Locked"
+                                ChangePct="changes.GetValueOrDefault(line.Code)"
+                                ChangePctChanged="value => SetChange(line.Code, value)" />
+                }
+            </section>
+        </div>
+
+        <aside>
+            <VerdictPanel Baseline="baseline" Result="result" SelectedPriorities="priorities" Modified="changes.Values.Any(v => v != 0)" OnReset="Reset" />
+        </aside>
+    </div>
+
+    <footer class="page-footer">
+        <p>
+            Source : Eurostat, comptes des administrations publiques françaises (État, Sécurité sociale, collectivités),
+            année @baseline.Year, extraits le @baseline.ExtractedOn.ToString("d").
+            Fourchettes : États membres de l'UE hors Irlande (PIB non comparable).
+        </p>
+        <p>
+            Calcul statique : une hausse d'impôt de 10 % est supposée rapporter 10 % de plus, sans effet sur l'activité,
+            les comportements ni la charge de la dette. La CSG est comptée avec l'impôt sur le revenu, comme en comptabilité nationale.
+        </p>
+    </footer>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = ScenarioQuery.Parameter)]
+    public string? ScenarioParameter { get; set; }
+
+    [SupplyParameterFromQuery(Name = ScenarioQuery.PrioritiesParameter)]
+    public string? PrioritiesParameter { get; set; }
+
+    private Baseline? baseline;
+    private FeasibilityResult? result;
+    private Dictionary<string, int> changes = new();
+    private HashSet<string> priorities = new();
+    private IReadOnlyList<Proposal> proposals = [];
+    private IReadOnlyList<ProgrammeEvaluation> programmes = [];
+    private DateOnly programmesUpdatedOn;
+    private bool loadFailed;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ProgrammeCatalog? catalog;
+        try
+        {
+            baseline = await Http.GetFromJsonAsync<Baseline>("data/baseline.json");
+            catalog = await Http.GetFromJsonAsync<ProgrammeCatalog>("data/programmes.json");
+        }
+        catch (Exception e) when (e is HttpRequestException or JsonException)
+        {
+            loadFailed = true;
+            return;
+        }
+
+        // Indépendants du scénario de l'utilisateur : évalués une seule fois.
+        programmes = catalog!.Programmes
+            .OrderBy(p => p.Candidate, StringComparer.CurrentCultureIgnoreCase)
+            .Select(p => ProgrammeEvaluator.Evaluate(baseline!, p))
+            .ToList();
+        programmesUpdatedOn = catalog.UpdatedOn;
+
+        changes = ScenarioQuery.Parse(ScenarioParameter, baseline!);
+        priorities = ScenarioQuery.ParsePriorities(PrioritiesParameter, baseline!);
+        Evaluate();
+    }
+
+    private void SetChange(string code, int value)
+    {
+        changes[code] = value;
+        Evaluate();
+        UpdateUrl();
+    }
+
+    private void TogglePriority(string code)
+    {
+        if (!priorities.Remove(code) && priorities.Count < ScenarioQuery.MaxPriorities)
+            priorities.Add(code);
+        Evaluate();
+        UpdateUrl();
+    }
+
+    // Piste de financement ou programme : le scénario remplace celui de l'utilisateur.
+    private void ApplyScenario(Scenario scenario)
+    {
+        changes = new Dictionary<string, int>(scenario.ChangesPct);
+        Evaluate();
+        UpdateUrl();
+    }
+
+    // Revient au budget de référence en gardant les priorités choisies.
+    private void Reset()
+    {
+        changes.Clear();
+        Evaluate();
+        UpdateUrl();
+    }
+
+    private void UpdateUrl() => Navigation.NavigateTo(
+        Navigation.GetUriWithQueryParameters(new Dictionary<string, object?>
+        {
+            [ScenarioQuery.Parameter] = NullIfEmpty(ScenarioQuery.Format(changes)),
+            [ScenarioQuery.PrioritiesParameter] = NullIfEmpty(ScenarioQuery.FormatPriorities(priorities)),
+        }),
+        replace: true);
+
+    private static string? NullIfEmpty(string value) => value.Length > 0 ? value : null;
+
+    private string? PriorityLabelFor(string lineCode) => baseline!.Priorities
+        .FirstOrDefault(p => priorities.Contains(p.Code) && p.LineCodes.Contains(lineCode))?.Label;
+
+    private void Evaluate()
+    {
+        var scenario = new Scenario(changes);
+        result = FeasibilityEvaluator.Evaluate(baseline!, scenario);
+        proposals = ProposalGenerator.Generate(baseline!, scenario, priorities);
+    }
+
+    private static string ChangeSuffix(decimal change) => Math.Round(change) == 0 ? "" : $"({change:+#,##0;-#,##0})";
+}

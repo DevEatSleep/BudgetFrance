@@ -1,0 +1,27 @@
+@using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
+
+<section class="priorities" aria-labelledby="priorities-title">
+    <h2 id="priorities-title">Qu'est-ce qui compte le plus pour vous&nbsp;? <small>@ScenarioQuery.MaxPriorities au plus</small></h2>
+    <div class="priority-chips">
+        @foreach (var priority in Priorities)
+        {
+            var pressed = Selected.Contains(priority.Code);
+            <button type="button" class="priority-chip" aria-pressed="@(pressed ? "true" : "false")"
+                    disabled="@(!pressed && Selected.Count >= ScenarioQuery.MaxPriorities)"
+                    title="@priority.Note" @onclick="() => OnToggle.InvokeAsync(priority.Code)">
+                @priority.Label @if (priority.Note is not null) { <span aria-hidden="true">ⓘ</span> }
+            </button>
+        }
+    </div>
+    @foreach (var priority in Priorities.Where(p => p.Note is not null && Selected.Contains(p.Code)))
+    {
+        <p class="priority-note">@priority.Label — @priority.Note</p>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<Priority> Priorities { get; set; } = [];
+    [Parameter, EditorRequired] public IReadOnlySet<string> Selected { get; set; } = new HashSet<string>();
+    [Parameter] public EventCallback<string> OnToggle { get; set; }
+}

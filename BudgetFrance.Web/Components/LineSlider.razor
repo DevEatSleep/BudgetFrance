@@ -1,0 +1,73 @@
+@using System.Globalization
+@using BudgetFrance.Domain
+
+<div class="line @(Locked ? "locked" : "")">
+    <div class="line-head">
+        <span class="line-label">
+            @Label @if (Locked) { <em>(non modifiable)</em> }
+            @if (PriorityLabel is not null) { <span class="line-priority">@PriorityLabel</span> }
+        </span>
+        <span class="line-amount">
+            @Amount.ToString("N1")&nbsp;Md€
+            @if (Change != 0)
+            {
+                <small class="line-delta @Direction">@Change.ToString("+#,##0.0;-#,##0.0")&nbsp;Md€</small>
+            }
+        </span>
+    </div>
+
+    <div class="line-control">
+        <div class="slider">
+            <input type="range" min="@(-Scenario.MaxChangePct)" max="@Scenario.MaxChangePct" step="1"
+                   value="@ChangePct" disabled="@Locked" aria-label="@Label"
+                   aria-valuetext="@($"{ChangePct:+0;-0;0} %, {Amount:N1} Md€")"
+                   @oninput="e => ChangePctChanged.InvokeAsync(int.Parse((string)e.Value!))" />
+        </div>
+        <span class="line-change @Direction">@ChangePct.ToString("+0;-0;0")&nbsp;%</span>
+        @* Toujours rendu (masqué à 0 %) pour garder les pourcentages alignés d'une ligne à l'autre. *@
+        <button type="button" class="line-reset @(ChangePct == 0 ? "hidden" : "")"
+                title="Revenir à 0 %" aria-label="Remettre « @Label » à 0 %"
+                @onclick="() => ChangePctChanged.InvokeAsync(0)">↺</button>
+    </div>
+
+    @if (Peers is not null && PctGdp is not null)
+    {
+        <div class="peers" title="Fourchette observée dans l'UE, en % du PIB">
+            <div class="peers-track" aria-hidden="true">
+                <div class="peers-range" style="left:@Percent(Peers.MinPctGdp);width:@Percent(Peers.MaxPctGdp - Peers.MinPctGdp)"></div>
+                <div class="peers-average" style="left:@Percent(Peers.EuAveragePctGdp)"></div>
+                <div class="peers-france @(WithinEuRange ? "" : "outside")" style="left:@Percent(PctGdp.Value)"></div>
+            </div>
+            <div class="peers-legend">
+                <span>@Peers.MinCountry @Peers.MinPctGdp.ToString("N1")&nbsp;%</span>
+                <span class="peers-you @(WithinEuRange ? "" : "outside")">
+                    Vous : @PctGdp.Value.ToString("N1")&nbsp;% du PIB (UE @Peers.EuAveragePctGdp.ToString("N1")&nbsp;%)
+                </span>
+                <span>@Peers.MaxCountry @Peers.MaxPctGdp.ToString("N1")&nbsp;%</span>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter, EditorRequired] public decimal Amount { get; set; }
+    [Parameter] public decimal Change { get; set; }
+    [Parameter] public bool Locked { get; set; }
+    [Parameter] public string? PriorityLabel { get; set; }
+    [Parameter] public int ChangePct { get; set; }
+    [Parameter] public EventCallback<int> ChangePctChanged { get; set; }
+
+    // Comparaison européenne : uniquement pour les dépenses.
+    [Parameter] public PeerRange? Peers { get; set; }
+    [Parameter] public decimal? PctGdp { get; set; }
+    [Parameter] public bool WithinEuRange { get; set; } = true;
+
+    private string Direction => ChangePct > 0 ? "up" : ChangePct < 0 ? "down" : "";
+
+    // Échelle de la barre : de 0 au plus grand niveau affiché, avec une marge.
+    private decimal ScaleMax => Math.Max(Peers!.MaxPctGdp, PctGdp!.Value) * 1.1m;
+
+    // Culture invariante : une virgule décimale casserait la valeur CSS.
+    private string Percent(decimal pctGdp) => (pctGdp / ScaleMax * 100m).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+}
