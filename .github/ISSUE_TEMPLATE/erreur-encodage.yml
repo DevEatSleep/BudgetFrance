@@ -1,0 +1,35 @@
+name: Erreur d'encodage
+description: Une mesure d'un programme 2027 est mal chiffrée, mal rattachée ou mal sourcée.
+title: "Erreur d'encodage : "
+labels: [encodage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Les programmes sont encodés selon une règle unique, identique pour tous les candidats ([méthode](https://budgetfrance.onrender.com/methode)).
+        Une correction n'est retenue que si elle est **sourcée**. Les avis politiques sur un programme ne sont pas traités ici.
+  - type: input
+    id: candidat
+    attributes:
+      label: Candidat
+    validations:
+      required: true
+  - type: input
+    id: mesure
+    attributes:
+      label: Mesure concernée
+    validations:
+      required: true
+  - type: textarea
+    id: erreur
+    attributes:
+      label: Ce qui est faux
+      description: Montant, poste de rattachement, source…
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source attestant la correction (lien, page)
+    validations:
+      required: true

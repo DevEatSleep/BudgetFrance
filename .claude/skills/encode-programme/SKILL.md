@@ -7,6 +7,8 @@ description: Encode ou met à jour le programme budgétaire d'un candidat à la 
 
 La neutralité de l'application repose sur une règle unique, appliquée de la même façon à tous les candidats. Ne t'en écarte pas, même pour un cas qui semble évident.
 
+La version publique de ces règles est `BudgetFrance.Web/Pages/Methode.razor` (page `/methode`) : tout changement de règle se reporte aux deux endroits.
+
 ## Préalables
 
 - **Source obligatoire, fournie par l'utilisateur** (lien ou document). Ne cherche pas toi-même de chiffres pour compléter un programme et **n'invente jamais un montant**. Si un montant manque dans la source, la mesure n'est pas encodée : signale-la dans le récapitulatif.
@@ -73,7 +75,8 @@ La neutralité de l'application repose sur une règle unique, appliquée de la m
 
 1. Lis la source en entier, puis liste les mesures chiffrées.
 2. Encode-les dans `programmes.json` en suivant les règles ci-dessus.
-3. Lance `dotnet test`. Le test `ProgrammeCatalogTests` refuse un poste inconnu ou verrouillé, une variation au-delà de ±50 %, un code en double et une URL invalide. Ne contourne jamais un échec : il signale une erreur d'encodage.
-4. Ajoute une ligne sous `[Unreleased]` dans `CHANGELOG.md`, rubrique « Données » (crée-la si besoin) : « Programme de X encodé (source, date) ».
-5. Commite sur la branche `programme/<code>`, sans fusionner.
-6. Donne à l'utilisateur un **récapitulatif à relire** : un tableau mesure | Md€ | poste | source, puis séparément les mesures en `null`, les mesures non encodées faute de montant et les rattachements discutables. La relecture humaine des rattachements est la garantie de neutralité : demande-la explicitement.
+3. Si une règle d'encodage change, mets à jour `/methode` (`Methode.razor`) dans le même commit.
+4. Lance `dotnet test`. Le test `ProgrammeCatalogTests` refuse un poste inconnu ou verrouillé, une variation au-delà de ±50 %, un code en double et une URL invalide. Ne contourne jamais un échec : il signale une erreur d'encodage.
+5. Ajoute une ligne sous `[Unreleased]` dans `CHANGELOG.md`, rubrique « Données » (crée-la si besoin) : « Programme de X encodé (source, date) ».
+6. Commite sur la branche `programme/<code>`, sans fusionner.
+7. Donne à l'utilisateur un **récapitulatif à relire** : un tableau mesure | Md€ | poste | source, puis séparément les mesures en `null`, les mesures non encodées faute de montant et les rattachements discutables. La relecture humaine des rattachements est la garantie de neutralité : demande-la explicitement.

@@ -1,5 +1,7 @@
 # BudgetFrance
 
+Site : https://budgetfrance.onrender.com
+
 Simulateur citoyen de la dépense publique française : l'utilisateur augmente ou réduit la dépense par domaine (éducation, santé, retraites…), ajuste les recettes, et l'application lui dit si son budget est **soutenable** et s'il a un **équivalent dans l'UE**.
 
 Périmètre : toutes les administrations publiques (État, Sécurité sociale, collectivités — secteur S13), nomenclature COFOG. Pas de compte, pas de backend : le scénario et les priorités sont encodés dans l'URL (`?s=SANTE:10,TVA:-5&p=CLIMAT,SANTE`).
@@ -37,13 +39,7 @@ Les programmes des candidats sont encodés à la main dans `BudgetFrance.Web/www
 }
 ```
 
-Règles d'encodage, identiques pour tous les candidats :
-
-- une mesure = un montant annuel en Md€ en régime de croisière (positif : plus de dépense ou de recette), rattaché à un poste de `baseline.json` et appliqué à l'année de référence ;
-- les mesures d'un même poste sont additionnées, puis converties en % entier du poste (arrondi au plus proche) ;
-- un effet revendiqué sans poste (croissance, lutte contre la fraude…) a `lineCode: null` : il est affiché, mais pas retenu dans le calcul statique ;
-- chaque mesure cite sa source ; privilégier un chiffrage tiers quand il existe ;
-- candidats par ordre alphabétique, pas de score ni de classement.
+Règles d'encodage et charte de neutralité : voir la [méthode](https://budgetfrance.onrender.com/methode) (source : `BudgetFrance.Web/Pages/Methode.razor`).
 
 `dotnet test` valide le fichier contre la baseline : poste inconnu ou verrouillé, variation au-delà de ±50 %, code dupliqué ou source invalide font échouer les tests.
 
@@ -66,30 +62,9 @@ dotnet run --project BudgetFrance.Importer -- 2024       # régénère les donn�
 
 L'importeur se lance depuis la racine du repo. Le JSON produit est versionné : il ne change qu'une fois par an, quand Eurostat publie une nouvelle année COFOG.
 
-## Données (Eurostat, sans clé d'API)
+## Données, règles de faisabilité et limites
 
-| Jeu | Usage |
-| --- | --- |
-| `gov_10a_exp` | Dépenses par fonction COFOG, France (Md€) et pays de l'UE (% du PIB) |
-| `gov_10a_main` | Recettes totales, TVA, impôts sur la production et sur le revenu, cotisations, impôts en capital |
-| `gov_10a_taxag` | Répartition impôt sur le revenu des ménages / impôt sur les sociétés ; taux de prélèvements obligatoires des pays de l'UE |
-| `nama_10_gdp` | PIB en valeur, et croissance nominale |
-| `gov_10dd_edpt1` | Dette publique (% du PIB) |
-
-## Règles de faisabilité
-
-- **Non soutenable** si le déficit dépasse 3 % du PIB ou si la dette augmente (déficit > dette × g / (1 + g), g = croissance nominale de l'année de référence).
-- **Faisable, mais sans équivalent dans l'UE** si un poste de dépense non verrouillé ou le taux de prélèvements obligatoires sort de la fourchette min–max des États membres.
-- **Faisable** sinon.
-
-## Limites connues
-
-- Calcul statique : pas d'effet de comportement, ni sur le PIB, ni sur la charge de la dette (verrouillée).
-- Programmes : variation arrondie au % entier du poste, soit une granularité d'environ 2,5 Md€ sur la santé ; une petite mesure isolée peut s'arrondir à zéro.
-- L'Irlande est exclue des comparaisons (PIB gonflé par les multinationales).
-- La CSG est classée avec l'impôt sur le revenu (comptabilité nationale) ; Eurostat ne permet pas de la séparer de l'IR.
-- La fonction « Retraites et vieillesse » (COFOG GF1002) inclut aussi la dépendance des personnes âgées.
-- Priorités transversales approximées : « Climat » = environnement (GF05) + énergie (GF0403, qui inclut aussi les aides aux énergies fossiles) + transports (GF0405, route comprise) ; « Égalité femmes-hommes » = famille et enfance (GF1004). Aucune donnée publique ne ventile la dépense APU par sexe ou par impact climatique ; le budget vert et le document de politique transversale « égalité » ne couvrent que l'État.
+Jeux Eurostat utilisés, règles du verdict et limites connues : voir la [méthode](https://budgetfrance.onrender.com/methode), page publique qui fait foi.
 
 ## Déploiement
 
@@ -104,3 +79,4 @@ Render n'a pas de SDK .NET pour les sites statiques, la construction se fait don
 
 - Code : [MIT](LICENSE).
 - Données : `baseline.json` est dérivé d'Eurostat (CC BY 4.0, © Union européenne) ; `programmes.json` est publié sous [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.fr), chaque mesure citant sa source.
+- Éditeur, hébergeur et données personnelles : [mentions légales](https://budgetfrance.onrender.com/mentions-legales).
