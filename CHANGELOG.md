@@ -16,6 +16,9 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 - Programmes 2027 : programmes des candidats encodés en mesures sourcées (`programmes.json`), évalués avec le même calcul, comparés sens par sens aux priorités du citoyen, applicables en un clic. Catalogue validé par les tests ; livré vide.
 - Nouveaux postes COFOG de niveau 2 : énergie (GF0403), transports (GF0405), famille et enfance (GF1004).
 
+- Licence MIT (code) et CC BY 4.0 (`programmes.json`).
+- Intégration continue (tests sur PR et `develop`) et déploiement sur Render via la branche `deploy`, construite par GitHub Actions.
+
 ### Modifié
 
 - Verdict compact sur mobile : détails repliables.
