@@ -9,7 +9,7 @@
 
 <header class="page-header">
     <h1>Et si c'était vous qui faisiez le budget&nbsp;?</h1>
-    <p>Augmentez ou réduisez la dépense publique par domaine, ajustez les impôts, et vérifiez si votre budget tient la route.</p>
+    <p>Répondez à quelques questions ou ajustez chaque poste, et vérifiez si votre budget tient la route.</p>
 </header>
 
 @if (loadFailed)
@@ -24,11 +24,7 @@ else
 {
     <PriorityPicker Priorities="baseline.Priorities" Selected="priorities" OnToggle="TogglePriority" />
 
-    @if (programmes.Count > 0)
-    {
-        <ProgrammeList Baseline="baseline" Programmes="programmes" UpdatedOn="programmesUpdatedOn"
-                       Mine="result.Priorities" SelectedPriorities="priorities" OnApply="ApplyScenario" />
-    }
+    <QuickQuiz Baseline="baseline" SelectedPriorities="priorities" OnApply="ApplyScenario" />
 
     <div class="layout">
         <div class="lines">
@@ -37,36 +33,46 @@ else
                 <ProposalList Baseline="baseline" Proposals="proposals" Gap="result.RemainingGap" OnApply="proposal => ApplyScenario(proposal.Scenario)" />
             }
 
-            <section>
-                <h2>Dépenses <small>@result.TotalSpending.ToString("N0")&nbsp;Md€ @ChangeSuffix(result.SpendingChange)</small></h2>
-                @* Les postes des priorités choisies d'abord ; OrderBy est stable, l'ordre COFOG est conservé sinon. *@
-                @foreach (var line in baseline.Spending.OrderBy(l => PriorityLabelFor(l.Code) is null))
-                {
-                    var position = result.Spending.Single(p => p.Code == line.Code);
-                    <LineSlider Label="@line.Label" Amount="position.Amount" Change="position.Change" Locked="line.Locked"
-                                PriorityLabel="@PriorityLabelFor(line.Code)"
-                                ChangePct="changes.GetValueOrDefault(line.Code)"
-                                ChangePctChanged="value => SetChange(line.Code, value)"
-                                Peers="line.Peers" PctGdp="position.PctGdp" WithinEuRange="position.WithinEuRange" />
-                }
-            </section>
+            <details class="expert">
+                <summary>Ajuster poste par poste (mode expert)</summary>
 
-            <section>
-                <h2>Recettes <small>@result.TotalRevenue.ToString("N0")&nbsp;Md€ @ChangeSuffix(result.RevenueChange)</small></h2>
-                @foreach (var line in baseline.Revenues)
-                {
-                    var position = result.Revenues.Single(r => r.Code == line.Code);
-                    <LineSlider Label="@line.Label" Amount="position.Amount" Change="position.Change" Locked="line.Locked"
-                                ChangePct="changes.GetValueOrDefault(line.Code)"
-                                ChangePctChanged="value => SetChange(line.Code, value)" />
-                }
-            </section>
+                <section>
+                    <h2>Dépenses <small>@result.TotalSpending.ToString("N0")&nbsp;Md€ @ChangeSuffix(result.SpendingChange)</small></h2>
+                    @* Les postes des priorités choisies d'abord ; OrderBy est stable, l'ordre COFOG est conservé sinon. *@
+                    @foreach (var line in baseline.Spending.OrderBy(l => PriorityLabelFor(l.Code) is null))
+                    {
+                        var position = result.Spending.Single(p => p.Code == line.Code);
+                        <LineSlider Label="@line.Label" Amount="position.Amount" Change="position.Change" Locked="line.Locked"
+                                    PriorityLabel="@PriorityLabelFor(line.Code)"
+                                    ChangePct="changes.GetValueOrDefault(line.Code)"
+                                    ChangePctChanged="value => SetChange(line.Code, value)"
+                                    Peers="line.Peers" PctGdp="position.PctGdp" WithinEuRange="position.WithinEuRange" />
+                    }
+                </section>
+
+                <section>
+                    <h2>Recettes <small>@result.TotalRevenue.ToString("N0")&nbsp;Md€ @ChangeSuffix(result.RevenueChange)</small></h2>
+                    @foreach (var line in baseline.Revenues)
+                    {
+                        var position = result.Revenues.Single(r => r.Code == line.Code);
+                        <LineSlider Label="@line.Label" Amount="position.Amount" Change="position.Change" Locked="line.Locked"
+                                    ChangePct="changes.GetValueOrDefault(line.Code)"
+                                    ChangePctChanged="value => SetChange(line.Code, value)" />
+                    }
+                </section>
+            </details>
         </div>
 
         <aside>
             <VerdictPanel Baseline="baseline" Result="result" SelectedPriorities="priorities" Modified="changes.Values.Any(v => v != 0)" OnReset="Reset" />
         </aside>
     </div>
+
+    @if (programmes.Count > 0)
+    {
+        <ProgrammeList Baseline="baseline" Programmes="programmes" UpdatedOn="programmesUpdatedOn"
+                       Mine="result.Priorities" SelectedPriorities="priorities" OnApply="ApplyScenario" />
+    }
 
     <footer class="page-footer">
         <p>
@@ -134,7 +140,7 @@ else
         UpdateUrl();
     }
 
-    // Piste de financement ou programme : le scénario remplace celui de l'utilisateur.
+    // Mode rapide, piste de financement ou programme : le scénario remplace celui de l'utilisateur.
     private void ApplyScenario(Scenario scenario)
     {
         changes = new Dictionary<string, int>(scenario.ChangesPct);
