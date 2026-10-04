@@ -24,7 +24,7 @@ else
 {
     <PriorityPicker Priorities="baseline.Priorities" Selected="priorities" OnToggle="TogglePriority" />
 
-    <QuickQuiz Baseline="baseline" SelectedPriorities="priorities" OnApply="ApplyScenario" />
+    <QuickQuiz Baseline="baseline" SelectedPriorities="priorities" Current="@ScenarioQuery.Format(changes)" OnApply="ApplyScenario" />
 
     <div class="layout">
         <div class="lines">

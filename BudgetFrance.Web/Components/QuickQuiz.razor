@@ -1,4 +1,5 @@
 @using BudgetFrance.Domain
+@using BudgetFrance.Web.Services
 
 <section class="quiz" aria-labelledby="quiz-title">
     <h2 id="quiz-title">Mode rapide</h2>
@@ -42,16 +43,39 @@
     [Parameter] public IReadOnlySet<string> SelectedPriorities { get; set; } = new HashSet<string>();
     [Parameter] public EventCallback<Scenario> OnApply { get; set; }
 
+    /// <summary>Scénario affiché, au format de l'URL (<see cref="ScenarioQuery.Format"/>).</summary>
+    [Parameter, EditorRequired] public string Current { get; set; } = "";
+
     private static readonly Direction[] Directions = [Direction.Less, Direction.Same, Direction.More];
 
     private readonly Dictionary<string, Direction> answers = new();
     private Direction? taxes;
+    private string? applied;
+    private string? seen;
 
     private bool Complete => taxes is not null && SelectedPriorities.All(answers.ContainsKey);
 
+    // Scénario modifié ailleurs (curseur, piste, programme, retour au budget) : les réponses ne le décrivent plus.
+    protected override void OnParametersSet()
+    {
+        if (Current == seen)
+            return;
+        seen = Current;
+        if (Current != applied)
+        {
+            answers.Clear();
+            taxes = null;
+        }
+    }
+
     // Les réponses d'une priorité désélectionnée sont gardées, mais pas appliquées.
-    private Task Apply() => OnApply.InvokeAsync(QuickScenario.Build(Baseline,
-        new(answers.Where(a => SelectedPriorities.Contains(a.Key)).ToDictionary(), taxes!.Value)));
+    private Task Apply()
+    {
+        var scenario = QuickScenario.Build(Baseline,
+            new(answers.Where(a => SelectedPriorities.Contains(a.Key)).ToDictionary(), taxes!.Value));
+        applied = ScenarioQuery.Format(scenario.ChangesPct);
+        return OnApply.InvokeAsync(scenario);
+    }
 
     // Aucune option cochée par défaut : le citoyen répond à chaque question.
     private RenderFragment Options(string name, Direction? selected, Action<Direction> select, int pct, decimal step, string scope) =>
