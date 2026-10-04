@@ -100,6 +100,29 @@
         </ul>
     }
 
+    <h2>Mode rapide</h2>
+    <p>
+        Chaque réponse « plus » ou « moins » fait varier de ±@QuickScenario.PriorityChangePct&nbsp;% tous les postes de la priorité ;
+        la réponse sur les impôts fait varier de ±@QuickScenario.TaxChangePct&nbsp;% toutes les recettes réglables
+        (les mêmes que l'effort fiscal réparti). Un même pourcentage pour toutes les priorités : en Md€, l'effet est
+        proportionnel à la taille du poste. Les postes hors priorités ne changent pas ; si deux priorités partagent un poste,
+        leurs réponses s'additionnent.
+    </p>
+    <p>
+        Certains postes et le taux de prélèvements obligatoires sont déjà proches du maximum européen : y répondre « plus »
+        peut suffire à rendre le budget sans équivalent dans l'UE, alors que « moins » les en éloigne.
+    </p>
+    @if (baseline is not null)
+    {
+        <ul>
+            @foreach (var priority in baseline.Priorities)
+            {
+                <li><strong>@priority.Label</strong> : ±@QuickScenario.PriorityStep(baseline, priority).ToString("N0")&nbsp;Md€</li>
+            }
+            <li><strong>Impôts et cotisations sociales</strong> : ±@QuickScenario.TaxStep(baseline).ToString("N0")&nbsp;Md€</li>
+        </ul>
+    }
+
     <h2>Pistes de financement</h2>
     <p>
         Tant que le budget n'est pas soutenable, le simulateur propose des pistes qui comblent l'effort restant :
